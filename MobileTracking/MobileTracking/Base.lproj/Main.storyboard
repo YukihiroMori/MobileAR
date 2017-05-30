@@ -22,14 +22,8 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zu4-Np-5ox" customClass="UIImageView">
-                                <rect key="frame" x="0.0" y="100" width="360" height="480"/>
+                                <rect key="frame" x="0.0" y="102" width="375" height="565"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <subviews>
-                                    <glkView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" fixedFrame="YES" enableSetNeedsDisplay="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0ok-SE-pVQ" customClass="GLView">
-                                        <rect key="frame" x="0.0" y="0.0" width="360" height="480"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                    </glkView>
-                                </subviews>
                                 <color key="backgroundColor" red="0.93120091620000001" green="0.90858919582559317" blue="0.87020085081709331" alpha="1" colorSpace="calibratedRGB"/>
                             </view>
                             <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Tracking Time :" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UgG-B1-SWA">
@@ -104,7 +98,6 @@
                         <outlet property="ResetButton" destination="i5a-nb-dfT" id="Aoy-lJ-32N"/>
                         <outlet property="StartButton" destination="OLF-pt-1Du" id="y0s-Lk-ZCK"/>
                         <outlet property="currentStateLabel" destination="eTy-4g-Aaz" id="brs-TP-vI2"/>
-                        <outlet property="glview" destination="0ok-SE-pVQ" id="sCr-oQ-Vbw"/>
                         <outlet property="informationView" destination="nzg-Pl-ZyR" id="sOa-mN-fnj"/>
                         <outlet property="previewImageView" destination="zu4-Np-5ox" id="M9u-79-NRV"/>
                         <outlet property="trackingTimeLabel" destination="UgG-B1-SWA" id="k7K-gC-77n"/>

@@ -8,8 +8,10 @@
 
 #include "ATAM.hpp"
 #include "Timer.hpp"
+
 #include <numeric>
 #include <fstream>
+
 #import <UIKit/UIKit.h>
 
 mutex loc;
@@ -19,6 +21,7 @@ extern sATAMParams PARAMS;
 CATAM::CATAM()
 {
     mReflesh = false;
+    relocalfailed = 0;
     reset();
 }
 
@@ -54,7 +57,6 @@ bool CATAM::init(string path)
 }
 
 void CATAM::loop(cv::Mat img, cv::Mat &prev){
-    
     CTimer timer;
     
     timer.Push(__FUNCTION__);
@@ -404,7 +406,7 @@ void CATAM::computePosefromE(
                              ) const
 {
     double focal = 1.0;
-    cv::Point2d pp = cv::Point2d(0.0, 0.0);
+    cv::Point2d pp = cv::Point2d(0, 0);
     int method = cv::LMEDS;
     double prob = 0.99;
     double th = 1.0 / mData.focal;
@@ -417,7 +419,6 @@ void CATAM::computePosefromE(
     
     cv::Rodrigues(R, rvec);
 }
-
 
 void CATAM::triangulate(
                         const std::vector<cv::Point2f> &vUnPt1,
@@ -454,7 +455,7 @@ void CATAM::triangulate(
         vpt3d[i].x = x / w;
         vpt3d[i].y = y / w;
         vpt3d[i].z = z / w;
-        
+
     }
 }
 
@@ -647,6 +648,7 @@ void CATAM::whileInitialize(void)
     }
 }
 
+
 void CATAM::transformToWorld(const sPose &local, sPose &world) const
 {
     cv::Mat tmpM;
@@ -664,14 +666,9 @@ bool CATAM::getWorldCoordinate(sPose &pose)
 {
     bool found = true;// mCalibrator.EstimatePose(mGImg, mData.A, mData.D, pose.rvec, pose.tvec);
     
-    //pose.rvec = (cv::Mat_<double>(3,1) << 3.1415926535 / 2.0, 3.1415926535 / 2.0, -3.1415926535 / 4.0);
-    //pose.tvec = (cv::Mat_<double>(3,1) << 0.0, 0.0, 2300.0);
-    
-    
-    pose.rvec = (cv::Mat_<double>(3,1) << 0.0, 0.0, 0.0);
+    pose.rvec = (cv::Mat_<double>(3,1) << 3.1415926535 / 2.0, 3.1415926535 / 2.0, -3.1415926535 / 4.0);
     pose.tvec = (cv::Mat_<double>(3,1) << 0.0, 0.0, 2300.0);
     
-     
     if (!found) {
         LOGOUT("Calibration board not found\n");
     }
@@ -687,7 +684,6 @@ void CATAM::registerWorld(void)
         tmp.first = world;
         tmp.second = mPose;
         mData.vPosePair.push_back(tmp);
-        
         preview.mText = "Translate camera and capture again";
     }
     
@@ -760,7 +756,11 @@ void CATAM::relocalize(void)
         LOGOUT("Relocalized\n");
         mState = STATE::TAM;
     } else {
-        changeRelocalImage();
+        relocalfailed++;
+        if(relocalfailed > 3){
+            changeRelocalImage();
+            relocalfailed = 0;
+        }
     }
 }
 

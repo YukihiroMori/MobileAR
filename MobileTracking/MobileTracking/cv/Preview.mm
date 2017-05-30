@@ -19,7 +19,7 @@ void Preview::draw(CATAM &atam, cv::Mat &img)
             drawTrack(atam, img);
             drawMap(atam, img);
             drawGrid(atam, img);
-            //drawChallenge(atam, img);
+            drawChallenge(atam, img);
             break;
         case STATE::RELOCAL:
             //drawView(atam, img);
@@ -52,7 +52,7 @@ void Preview::drawView(CATAM &atam, cv::Mat &img)
 void Preview::drawProcess(CATAM &atam, cv::Mat &img)
 {
     cv::Scalar textCol(0, 255, 0 , 255);
-    //putText(img, mText, cv::Point(0, img.rows - 5), cv::FONT_HERSHEY_SIMPLEX, 0.5, textCol, 2);
+    putText(img, mText, cv::Point(0, img.rows - 5), cv::FONT_HERSHEY_SIMPLEX, 0.5, textCol, 2);
     
     textCol = cv::Scalar(0, 255, 0 , 255);
     putText(img, to_string(int(atam.mFPS)) + " FPS", cv::Point(0, 15), cv::FONT_HERSHEY_SIMPLEX, 0.3, textCol, 1);
@@ -94,8 +94,6 @@ void Preview::drawGrid(CATAM &atam, cv::Mat &img) const
         
         sPose tmp;
         atam.transformToWorld(atam.mPose, tmp);
-            
-        vec3 t = vec3(tmp.tvec.at<float>(0),tmp.tvec.at<float>(1),tmp.tvec.at<float>(2));
         
         cv::Scalar col(0, 255, 0 , 255);
         const int lineWidth = 1;
@@ -179,11 +177,9 @@ void Preview::drawChallenge(CATAM &atam, cv::Mat &img)
         }
         
         if (vPt3d.size() == 1) {
-            
             projectPoints(vPt3d, tmp.rvec, tmp.tvec, atam.mData.A, atam.mData.D, vPt2d);
             
             cv::Point pt = vPt2d[0];
-            
             circle(img, pt, radius, col, lineWidth);
             putText(img, std::to_string(ID), pt + cv::Point(radius, 0), cv::FONT_HERSHEY_SIMPLEX, 1.5, col, 2);
         }

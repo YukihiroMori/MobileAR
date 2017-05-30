@@ -21,7 +21,6 @@
 #include <iostream>
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
-#include <glm/gtx/transform.hpp>
 #include <opencv2/opencv.hpp>
 #include <Eigen/Dense>
 
@@ -37,6 +36,9 @@
 #include "State.hpp"
 #include "Preview.hpp"
 
+using namespace std;
+using namespace glm;
+using namespace Eigen;
 
 
 /*!
@@ -122,6 +124,7 @@ public:
     bool mReflesh;
     
 private:
+    int relocalfailed;
     
     Matrix3d Rot = Matrix3d::Identity(3,3);
     Vector3d Pos = Vector3d::Zero(3);
@@ -131,5 +134,4 @@ private:
     Preview preview;
 };
 
-    
 #endif /* ATAM_hpp */

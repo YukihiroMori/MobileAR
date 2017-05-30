@@ -16,13 +16,16 @@
 #include <opencv2/opencv.hpp>
 #include <Eigen/Dense>
 
+using namespace std;
+using namespace glm;
+using namespace Eigen;
 
 class CATAM;
 
 class Preview {
     
 public:
-    std::string mText;	//!< instruction on image
+    string mText;	//!< instruction on image
     
     void drawChallenge(CATAM &atam, cv::Mat &img);
     

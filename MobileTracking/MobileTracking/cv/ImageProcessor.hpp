@@ -14,10 +14,10 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
+#import <UIKit/UIKit.h>
 #include <mutex>
 #include "Utils.hpp"
 #include "ATAM.hpp"
-#import <UIKit/UIKit.h>
 
 using namespace std;
 using namespace cv;
@@ -36,9 +36,9 @@ private:
 
     std::vector<cv::Mat> vimg;
     
-public:
     CATAM atam;
     
+public:
     ImageProcessor();
     
     UILabel *trackingTimeLabel;
@@ -62,6 +62,5 @@ public:
     void stop();
     void Calibration();
 };
-
 
 #endif /* ImageProcessor_hpp */

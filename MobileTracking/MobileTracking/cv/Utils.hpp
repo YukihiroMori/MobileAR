@@ -5,8 +5,8 @@
 //  Created by 森 幸浩 on 2017/03/22.
 //  Copyright © 2017年 森 幸浩. All rights reserved.
 //
-#ifndef Utils_hpp
-#define Utils_hpp
+#ifndef Utils_h
+#define Utils_h
 
 #define Debug 1
 

@@ -8,6 +8,7 @@
 
 #include "ImageProcessor.hpp"
 #include <iomanip>
+#include "opencv2/opencv.hpp"
 #include "Cam.hpp"
 #include "Calibration.hpp"
 
