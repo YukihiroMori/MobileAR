@@ -8,10 +8,11 @@
 
 #import <UIKit/UIKit.h>
 
+@class GLViewController;
+
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
-
 
 @end
 

@@ -7,21 +7,23 @@
 //
 
 #include "ImageProcessor.hpp"
+#include "GLView.h"
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
 #import <CoreVideo/CoreVideo.h>
 #import <CoreImage/CoreImage.h>
+#import <CoreMotion/CoreMotion.h>
 #import <CoreGraphics/CoreGraphics.h>
-#import <QuartzCore/QuartzCore.h>
-#include <OpenGLES/ES2/gl.h>
-#include <OpenGLES/ES2/glext.h>
-#include <glm/glm.hpp>
+#include <OpenGLES/ES3/gl.h>
+#include <OpenGLES/ES3/glext.h>
+#include <OpenGLES/EAGL.h>
+
 
 @interface ViewController : UIViewController <AVCaptureVideoDataOutputSampleBufferDelegate>
 {
+    @public
     ImageProcessor prossesor;
 }
 @end
-
 
 

@@ -8,6 +8,12 @@
 
 #include "ImageProcessor.hpp"
 #include <iomanip>
+#include "Cam.hpp"
+#include "Calibration.hpp"
+
+static string path;
+
+const int FRAME_SIZE = 360;
 
 UIImage* ImageProcessor::processing(UIImage *image){
     Mat preview;
@@ -16,164 +22,151 @@ UIImage* ImageProcessor::processing(UIImage *image){
     area.x = current.size().width;
     area.y = current.size().height;
     
-    if(selectObject){
-        drawPreview(preview);
-    }
+    cv::Rect rect;
+    rect.x = (current.size().width - FRAME_SIZE) / 2.0;
+    rect.y = (current.size().height - FRAME_SIZE) / 2.0;
+    rect.width = FRAME_SIZE;
+    rect.height = FRAME_SIZE;
+    Mat trim(current, rect);
     
-    if(state == NotInitialized){
-        CALC_START()
-        
-        {
-            stringstream state;
-            state << "RecogValue : " << endl;
-            State(state.str())
-        }
-        //CALC_END("Tracking Time :")
-        CALC_ENDV2("Tracking Time :")
-        
-        stringstream inf;
-        inf << "IsTracked : " <<  (state != NotInitialized? "true" : "false") << endl;
-        Infomation(inf.str())
-    }
+    preview = trim.clone();
     
-    if(state == Tracking){
-        bool isTracked = false;
-        Vector3d t;
-        Matrix3d R;
-        
-        CALC_START()
-        {
-            lock_guard<mutex> lock(loc);
-            ft->Tracking(current, isTracked, t, R);
-        }
-        
-        if(isTracked){
-            
-            vec3 rot;
-            
-            if(R(2,1) == 1.0){
-                rot.x = asin(R(2,1));
-                rot.y = 0.0;
-                rot.z = atan(R(1,0),R(0,0));
-            } else if(R(2,1) == -1.0){
-                rot.x = -asin(R(2,1));
-                rot.y = 0.0;
-                rot.z = atan(R(1,0),R(0,0));
-            } else {
-                rot.x = asin(R(2,1));
-                rot.y = atan(-R(0,1),R(1,1));
-                rot.z = atan(-R(2,0),R(2,2));
-            }
-            
-            rot *= 180.0 / M_PI;
-            
-            //cout << fixed << setprecision(2) << "x: " << t(0) << "y: " << t(1) << "z: " << t(2)<< endl;
-            //cout << "Rx: " << rot.x << "Ry: " << rot.y << "Rz: " << rot.z << endl;
-            
-            Vector3d v = t.transpose() * Rot;
-            
-            Pos += v;
-            Rot *= R;
-            
-            if(Rot(2,1) == 1.0){
-                rot.x = asin(Rot(2,1));
-                rot.y = 0.0;
-                rot.z = atan(Rot(1,0),Rot(0,0));
-            } else if(Rot(2,1) == -1.0){
-                rot.x = -asin(Rot(2,1));
-                rot.y = 0.0;
-                rot.z = atan(Rot(1,0),Rot(0,0));
-            } else {
-                rot.x = asin(Rot(2,1));
-                rot.y = atan(-Rot(0,1),Rot(1,1));
-                rot.z = atan(-Rot(2,0),Rot(2,2));
-            }
-            
-            rot *= 180.0 / M_PI;
-            
-            stringstream inf;
-            inf << fixed << setprecision(2) << "x: " << Pos(0) << "y: " << Pos(1) << "z: " << Pos(2) << endl << "Rx: " << rot.x << "Ry: " << rot.y << "Rz: " << rot.z << endl;
-            Infomation(inf.str())
-        }
-        
-        stringstream state;
-        state << "IsTracked : " <<  (isTracked? "true" : "false") << endl;
-        State(state.str())
-        
-        CALC_ENDV2("Reconstruction Time :")
+    {
+        lock_guard<mutex> lock(loc);
+        atam.loop(trim, preview);
     }
-
     return MatToUIImage(preview);
 }
 
-void ImageProcessor::drawPreview(Mat result){
-    vec2 pos = trackpos * area;
-    
-    if(isArea(area, pos, trackSize)){
-        rectangle(result,cv::Point(pos.x - trackSize.x/2.0f,pos.y - trackSize.y/2.0f), cv::Point(pos.x + trackSize.x/2.0f, pos.y + trackSize.y/2.0f), cv::Scalar(0,0,255,255), 1, CV_AA);
+void ImageProcessor::setGyro(double x, double y, double z){
+    {
+        lock_guard<mutex> lock(loc);
+        atam.Gyro.rvec = (Mat_<double>(3,1) << x, y, z);
+    }
+}
+
+void ImageProcessor::stop(){
+    {
+        lock_guard<mutex> lock(loc);
+        atam.Stop();
     }
 }
 
 ImageProcessor::ImageProcessor(){
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *docs = [paths objectAtIndex:0];
+    path = [docs UTF8String];
     {
         lock_guard<mutex> lock(loc);
-        ft = auto_ptr<FrameTracker>(new FrameTracker());
+        atam.Start(path);
     }
 }
 
 void ImageProcessor::touchStart(vec2 pos){
-    selectObject = true;
-    if(!current.empty()){
-        Mat preview;
-        
-        {
-            lock_guard<mutex> lock(loc);
-            ft->init_start(current);
-            
-            preview = ft->getStartPreview().clone();
-        }
-        
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            leftImageView.image = MatToUIImage(preview);
-        });
-        
+    {
+        lock_guard<mutex> lock(loc);
+        atam.operation(' ');
     }
 }
 
 void ImageProcessor::touchMove(vec2 pos){
-    trackpos = pos;
 }
 
 
 void ImageProcessor::touchEnd(vec2 pos){
-    selectObject = false;
-    
-    if(!current.empty()){
-        Mat lpreview;
-        Mat rpreview;
-        
-        CALC_START()
-        {
-            lock_guard<mutex> lock(loc);
-            ft->init_end(current);
-            
-            lpreview = ft->getStartPreview().clone();
-            rpreview = ft->getEndPreview().clone();
-            
-            state = Tracking;
-        }
-        CALC_ENDV2("Reconstruction Time :")
-        
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            leftImageView.image = MatToUIImage(lpreview);
-        });
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            rightImageView.image = MatToUIImage(rpreview);
-        });
-        
-        
+}
+
+void ImageProcessor::start(){
+}
+
+void ImageProcessor::reset(){
+    {
+        lock_guard<mutex> lock(loc);
+        atam.operation('r');
     }
+}
+
+void ImageProcessor::N(){
+    {
+        lock_guard<mutex> lock(loc);
+        atam.operation('n');
+    }
+}
+
+void ImageProcessor::C(){
+    {
+        lock_guard<mutex> lock(loc);
+        atam.operation('c');
+    }
+}
+
+void ImageProcessor::Q(){
+    {
+        lock_guard<mutex> lock(loc);
+        atam.operation('q');
+    }
+}
+
+void ImageProcessor::Calibration(){
+    if(current.empty()){
+        return;
+    }
+    
+    cv::Mat im = current;
+    
+    CCalibration calib;
+    
+    cv::Mat detect = im.clone();
+    
+    if (vimg.size() < 12) {	// save image
+        // extract corners
+        std::vector< cv::Point2f > tmp;
+        cv::Mat gDetect;
+        cv::cvtColor(detect, gDetect, cv::COLOR_BGR2GRAY);
+        
+        bool found = calib.DetectCorners(gDetect, tmp);
+        if (found) {
+            calib.DrawCorners(detect, tmp);
+            vimg.push_back(im.clone());
+            printf("image:%02d saved\n", int(vimg.size()));
+        }
+        
+        return;
+    }
+    
+    std::vector< std::vector< cv::Point2f > > imagePoints;
+    bool iscalib = true;
+    
+    // for each image
+    for (int i = 0, iend = int(vimg.size()); i < iend; ++i) {
+        
+        // extract corners
+        std::vector< cv::Point2f > tmp;
+        cv::Mat gIm;
+        cv::cvtColor(vimg[i], gIm, cv::COLOR_BGR2GRAY);
+        bool found = calib.DetectCorners(gIm, tmp);
+        if (found) {
+            imagePoints.push_back(tmp);
+            
+            calib.DrawCorners(vimg[i], tmp);
+        }
+    }
+    
+    if (imagePoints.size() == 0) {
+        printf("calibration failed\n");
+        iscalib = false;
+    }
+    
+    cv::Mat intrinsic, distortion;
+    
+    calib.Calibrate(imagePoints, vimg[0].size(), intrinsic, distortion);
+    
+    if (iscalib) {
+        CCam camera;
+        camera.A = intrinsic;
+        camera.D = distortion;
+        
+        camera.SaveParameters(path + "/camera");
+    }
+
 }

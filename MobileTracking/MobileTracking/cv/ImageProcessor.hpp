@@ -14,11 +14,10 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
-#import <UIKit/UIKit.h>
 #include <mutex>
 #include "Utils.hpp"
-#include "FrameTracker.hpp"
-#include <Eigen/Dense>
+#include "ATAM.hpp"
+#import <UIKit/UIKit.h>
 
 using namespace std;
 using namespace cv;
@@ -34,33 +33,35 @@ private:
     
     Mat current;
     vec2 area;
-    
-    bool selectObject = false;
-    
-    vec2 trackpos;
-    vec2 trackSize = vec2(100.0f);
-    
-    auto_ptr<FrameTracker> ft;
-    
-    Matrix3d Rot = Matrix3d::Identity(3,3);
-    Vector3d Pos = Vector3d::Zero(3);
+
+    std::vector<cv::Mat> vimg;
     
 public:
+    CATAM atam;
+    
     ImageProcessor();
     
-    UIImageView *leftImageView;
-    UIImageView *rightImageView;
     UILabel *trackingTimeLabel;
     UILabel *currentStateLabel;
     UITextView *informationView;
     
     UIImage* processing(UIImage *image);
     
+    void setGyro(double x, double y, double z);
+    
     void touchStart(vec2 position);
     void touchMove(vec2 position);
     void touchEnd(vec2 position);
     
-    void drawPreview(Mat result);
+    void start();
+    void reset();
+    void N();
+    void C();
+    void Q();
+    
+    void stop();
+    void Calibration();
 };
+
 
 #endif /* ImageProcessor_hpp */

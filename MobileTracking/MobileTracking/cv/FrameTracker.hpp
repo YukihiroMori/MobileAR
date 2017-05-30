@@ -89,11 +89,20 @@ public:
 class P {
 
 public:
+    shared_ptr<Frame> frame;
+    
+    Point2f point;
+    
     Vector3d position;
+    
+    int referense = 0;
+    int died = 0;
     
     P clone(){
         P p;
+        p.frame = frame;
         p.position = position;
+        p.point = point;
         return p;
     }
 };
@@ -105,11 +114,6 @@ public:
     void push(vector<P> plist){
         
         copy(plist.begin(),plist.end(),back_inserter(Map));
-        
-        int over = Map.size() - 3000;
-        if(over > 0){
-            Map.erase(Map.begin(), Map.begin() + over);
-        }
     }
     
     void ProjectMat(Vector3d t , Matrix3d R, vector<P> &pList){
@@ -312,12 +316,6 @@ public:
         //vector<Vector3d> X(Num);
         //if(!TwoViewReconstruction::reconstruction(pos1, pos2, Num, theta, R, t, nfl0, nfl1, X)) return;
         
-        //cout << "Matched :" << result.matches.size() << endl;
-        
-        //cout << "R = \n" << R << endl;
-        //cout << "R :" << thx << " " << thy << " " << thz << endl;
-        //cout << "t :" << t.transpose() << endl;
-        
         pos = t;
         rot = R;
         tracked = true;
@@ -380,12 +378,6 @@ public:
         if(!TwoViewReconstruction::motion_parameter_computation(theta, nfl0, nfl1, pos1, pos2, Num, R, t)) return;
             
         //if(!TwoViewReconstruction::reconstruction(pos1, pos2, Num, theta, R, t, nfl0, nfl1, X)) return;
-        
-        
-        //cout << "Matched :" << result.matches.size() << endl;
-         
-        //cout << "R = \n" << R << setprecision(3) << endl;
-        //cout << "t = " << t.transpose() << setprecision(3) << endl;
         
         list.push_back(start);
         prev = make_shared<Frame>(end);

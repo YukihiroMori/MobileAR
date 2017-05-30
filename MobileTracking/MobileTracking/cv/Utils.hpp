@@ -5,8 +5,8 @@
 //  Created by 森 幸浩 on 2017/03/22.
 //  Copyright © 2017年 森 幸浩. All rights reserved.
 //
-#ifndef Utils_h
-#define Utils_h
+#ifndef Utils_hpp
+#define Utils_hpp
 
 #define Debug 1
 
@@ -37,40 +37,6 @@ dispatch_async(dispatch_get_main_queue(), ^{\
 dispatch_async(dispatch_get_main_queue(), ^{\
 currentStateLabel.text =  [NSString stringWithUTF8String:s_state.c_str()];\
 });}
-
-#import <opencv2/opencv.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#import <glm/glm.hpp>
-
-
-static bool isArea(cv::Mat m, cv::Rect rc){
-    if( rc.x < 0.0f || rc.y < 0.0f || rc.x + rc.width > m.size().width || rc.y + rc.height > m.size().height ){
-        return false;
-    }
-    return true;
-}
-
-static bool isArea(glm::vec2 area, glm::vec2 pos, glm::vec2 size){
-    float x = pos.x - size.x / 2.0f;
-    float y = pos.y - size.y / 2.0f;
-    float w = size.x;
-    float h = size.y;
-    
-    if( x < 0.0f || y < 0.0f || x + w > area.x || y + h > area.y){
-        return false;
-    }
-    return true;
-}
-
-static cv::Rect createRect(glm::vec2 pos, glm::vec2 size){
-    cv::Rect rct;
-    rct.x = pos.x - size.x / 2.0f;
-    rct.y = pos.y - size.y / 2.0f;
-    rct.width = size.x;
-    rct.height = size.y;
-    
-    return rct;
-}
 
 
 #endif /* Utils_h */
